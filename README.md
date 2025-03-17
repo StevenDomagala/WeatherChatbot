@@ -10,6 +10,7 @@ https://developers.amadeus.com/ ; AMADEUS_API_KEY & AMADEUS_API_SECRET<br>
 https://openweathermap.org/ ; WEATHER_API_KEY<br>
 <br>
 ------- TESTING -------<br>
+The following was used to test the chatbot<br>
 <br>
 Test Weather<br>
 weather bristol<br>
