@@ -24,7 +24,7 @@ install_package("openpyxl")
 install_package("python-dotenv")
 """
 
-import os  # Provides functions for interacting with the operating system
+import os  # Provides functions for interacting with the operating system.
 import multiprocessing  # Enables parallel processing to improve performance in multi-core CPUs
 import logging  # Enables logging for debugging and tracking errors
 import asyncio  # Provides asynchronous I/O support for concurrent programming
