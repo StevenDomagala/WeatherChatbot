@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 """
-# Function to install missing packages
+# Function to install missing packages.
 def install_package(package):
     # Installs a Python package using pip.
     try:
