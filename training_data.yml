@@ -1,0 +1,24 @@
+categories:
+  - weather
+  - locations
+  - activities
+  - general
+
+conversations:
+  - - "What is the weather like in Melbourne?"
+    - "I'm sorry, I don't have weather data for Melbourne. Please ask for a valid location."
+
+  - - "Tell me the weather for Bristol"
+    - "Bristol's weather details can be fetched. Please wait..."
+
+  - - "What can I do in rainy weather?"
+    - "You can go to an indoor museum, visit a café, or watch a movie!"
+
+  - - "Which locations do you know?"
+    - "I have weather data for: Cumbria, Corfe Castle, The Cotswolds, Cambridge, Bristol, Oxford, Norwich, Stonehenge, Watergate Bay, and Birmingham."
+
+  - - "Can you provide a forecast for Oxford?"
+    - "Fetching Oxford's 5-day forecast. Please wait..."
+
+  - - "Who wrote the code?"
+    - "Steven Domagala did!"

@@ -82,7 +82,7 @@ def load_manual_responses() -> dict:
 MANUAL_RESPONSES = load_manual_responses()
 
 # OpenWeatherMap API setup
-API_KEY = os.getenv("WEATHER_API_KEY")  # Use environment variable for security
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")  # Use environment variable for security
 
 CURRENT_WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather"
 FORECAST_URL = "http://api.openweathermap.org/data/2.5/forecast"
@@ -133,7 +133,7 @@ async def get_weather_for_location(city: str) -> str:
         return f"{city}: Weather data unavailable."
 
     lat, lon = LOCATIONS[city]
-    params = {"lat": lat, "lon": lon, "appid": API_KEY, "units": "metric"}
+    params = {"lat": lat, "lon": lon, "appid": WEATHER_API_KEY, "units": "metric"}
 
     async with aiohttp.ClientSession() as session:
         data = await fetch_weather(session, CURRENT_WEATHER_URL, params)
@@ -160,7 +160,7 @@ async def get_forecast_for_location(city: str) -> str:
         return f"{city}: Forecast data unavailable."
 
     lat, lon = LOCATIONS[city]
-    params = {"lat": lat, "lon": lon, "appid": API_KEY, "units": "metric"}
+    params = {"lat": lat, "lon": lon, "appid": WEATHER_API_KEY, "units": "metric"}
 
     async with aiohttp.ClientSession() as session:
         data = await fetch_weather(session, FORECAST_URL, params)
