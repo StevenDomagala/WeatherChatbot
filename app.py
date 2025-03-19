@@ -1,6 +1,10 @@
 import subprocess  # Allows execution of system commands, used here to install missing packages dynamically
 import sys  # Provides access to system-specific parameters and functions
 
+# Load environment variables from .env file (if used)
+from dotenv import load_dotenv
+load_dotenv()
+
 """
 # Function to install missing packages
 def install_package(package):
@@ -10,18 +14,30 @@ def install_package(package):
     except subprocess.CalledProcessError as e:
         print(f"Error installing {package}: {e}")
 
-# Install required packages
-install_package("flask[async]")
-install_package("pandas")
-install_package("aiohttp")
-install_package("amadeus")
-install_package("chatterbot")
-install_package("chatterbot_corpus")
-install_package("flask_caching")
-install_package("spacy")
-install_package("pyyaml")
-install_package("openpyxl")
-install_package("python-dotenv")
+# Install Ppackages
+# Flask & Web Framework
+install_package("flask[async]")  # Flask for web framework (including async support)
+install_package("flask-caching")  # Flask caching to store API results
+install_package("python-dotenv")  # Load .env file variables
+# Data Handling
+install_package("pandas")  # Used for handling chatbot responses from Excel
+install_package("openpyxl")  # Required for reading .xlsx Excel files
+# API & Asynchronous Requests
+install_package("aiohttp")  # Asynchronous HTTP requests for APIs
+install_package("requests")  # Standard HTTP requests (for testing)
+# Chatbot & NLP
+install_package("chatterbot")  # Chatbot framework
+install_package("chatterbot_corpus")  # Pre-trained chatbot datasets
+install_package("spacy")  # NLP processing (used in some chatbot features)
+install_package("pyyaml")  # Required for ChatterBot training corpus
+# Travel & Weather APIs
+install_package("amadeus")  # Amadeus API for travel suggestions
+# Testing & Debugging
+install_package("pytest")  # Testing framework
+install_package("beautifulsoup4")  # For extracting text from HTML responses
+install_package("bs4")  # (Alternative way of installing BeautifulSoup)
+install_package("pytest-flask")  # Testing Flask apps
+install_package("pytest-asyncio")  # Async testing for Flask async routes
 """
 
 import os  # Provides functions for interacting with the operating system.
@@ -82,7 +98,9 @@ def load_manual_responses() -> dict:
 MANUAL_RESPONSES = load_manual_responses()
 
 # OpenWeatherMap API setup
-WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")  # Use environment variable for security
+WEATHER_API_KEY = os.getenv("WEATHER_API_KEY")  # Ensure this line is present
+if WEATHER_API_KEY is None:
+    raise ValueError("ERROR: WEATHER_API_KEY is not set! Make sure to set it in your environment.")
 
 CURRENT_WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather"
 FORECAST_URL = "http://api.openweathermap.org/data/2.5/forecast"
@@ -119,8 +137,10 @@ def generate_activity_links(activities: str, city: str) -> str:
         activity_links.append(f'<a href="{search_url}" target="_blank">{activity}</a>')
     return ", ".join(activity_links)
 
-async def fetch_weather(session: aiohttp.ClientSession, url: str, params: dict) -> dict:
+async def fetch_weather(session, url, params):
     async with session.get(url, params=params) as response:
+        response_text = await response.text()
+        print(f"DEBUG: API Response for {params}: {response_text}")  # Add this line
         return await response.json()
 
 async def get_weather_for_location(city: str) -> str:
@@ -183,10 +203,6 @@ async def get_forecast_for_location(city: str) -> str:
         return forecast_response
     return f"{city}: Unable to retrieve forecast."
 
-# Load environment variables from .env file (if used)
-from dotenv import load_dotenv
-load_dotenv()
-
 # Initialise Amadeus API Client securely
 amadeus = Client(
     client_id=os.getenv("AMADEUS_API_KEY"),
@@ -212,10 +228,14 @@ async def fetch_amadeus_suggestions(city: str):
                           for act in activities_response.data[:5]]  # Limit to 5 activities
             return f"<strong style='color:black;'>Top Activities in {city}:</strong><br>" + "<br>".join(activities)
         else:
-            return f"No activities found for {city}."
+            return f"No activities found for {city} via Amadeus. Try searching on " \
+                   f"<a href='https://www.google.com/search?q=things+to+do+in+{city.replace(' ', '+')}' target='_blank'>Google</a> or " \
+                   f"<a href='https://www.tripadvisor.com/Search?q={city.replace(' ', '+')}' target='_blank'>TripAdvisor</a>."
     except ResponseError as e:
         logging.error(f"Amadeus API error: {e}")
         return f"Error retrieving travel suggestions for {city}."
+
+
 @app.route("/get_response", methods=["POST"])
 async def get_response():
     user_message = request.json.get("message", "").strip().lower()
