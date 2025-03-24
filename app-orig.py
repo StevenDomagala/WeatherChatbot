@@ -55,11 +55,6 @@ if __name__ == "__main__":
     else:
         multiprocessing.set_start_method("fork", force=True)
 
-INTENT_SYNONYMS = {
-    "weather": ["temperature in", "climate in", "weather like in", "how hot is", "how cold is"],
-    "forecast": ["5-day forecast", "weather forecast", "weekly weather", "forecast for", "future weather"],
-    "travel": ["trip to", "visit", "vacation in", "going to", "heading to", "exploring", "traveling to", "plan to visit", "holiday in"]
-}
 app = Flask(__name__)
 
 # Configure Flask-Caching (caching weather & forecasts)
@@ -235,49 +230,44 @@ async def fetch_amadeus_suggestions(city: str):
         return f"Error retrieving travel suggestions for {city}."
 
 
-def normalize_intents(message: str) -> str:
-    """Append standard intent keywords based on synonyms without removing original phrasing."""
-    for intent, synonyms in INTENT_SYNONYMS.items():
-        for phrase in synonyms:
-            if phrase in message and intent not in message:
-                message += f" {intent}"
-    return message
-
 @app.route("/get_response", methods=["POST"])
 async def get_response():
-    user_message = normalize_intents(request.json.get("message", "").strip().lower())
+    user_message = request.json.get("message", "").strip().lower()
 
     manual_responses = load_manual_responses()
     requested_locations = [loc for loc in LOCATIONS.keys() if loc.lower() in user_message]
-    responses = []
 
-    # Weather intent
-    if "weather" in user_message and requested_locations:
+    # Handle weather requests
+    if "weather" in user_message:
+        if not requested_locations:
+            return jsonify({"response": "Unknown location. Please ask for weather from a valid location."})
         weather_responses = await asyncio.gather(*(get_weather_for_location(loc) for loc in requested_locations))
-        responses.append("<br>".join(weather_responses))
+        return jsonify({"response": "<br>".join(weather_responses)})
 
-    # Forecast intent
-    if "forecast" in user_message and requested_locations:
+    # Handle forecast requests
+    if "forecast" in user_message:
+        if not requested_locations:
+            return jsonify({"response": "Unknown location. Please ask for a forecast from a valid location."})
         forecast_responses = await asyncio.gather(*(get_forecast_for_location(loc) for loc in requested_locations))
-        responses.append("<br>".join(forecast_responses))
+        return jsonify({"response": "<br>".join(forecast_responses)})
 
-    # Travel suggestions via Amadeus
-    if ("travel" in user_message or "things to do" in user_message) and requested_locations:
+    # Handle travel suggestions via Amadeus
+    if "travel" in user_message or "things to do" in user_message:
+        if not requested_locations:
+            return jsonify({"response": "Please specify a location to get travel recommendations."})
         travel_suggestions = await asyncio.gather(*(fetch_amadeus_suggestions(loc) for loc in requested_locations))
-        responses.append("<br>".join(travel_suggestions))
+        return jsonify({"response": "<br>".join(travel_suggestions)})
 
     # Step 2: Check predefined responses
-    if not responses and user_message in manual_responses:
+    if user_message in manual_responses:
         return jsonify({"response": manual_responses[user_message]})
 
-    # Step 3: If no predefined or intent-based response, send to ChatterBot
-    if not responses:
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor() as executor:
-            bot_response = await loop.run_in_executor(executor, chatbot.get_response, user_message)
-        return jsonify({"response": f"Bot: {bot_response}"})
+    # Step 3: If no predefined response, send to ChatterBot
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as executor:
+        bot_response = await loop.run_in_executor(executor, chatbot.get_response, user_message)
 
-    return jsonify({"response": "<br><br>".join(responses)})
+    return jsonify({"response": f"Bot: {bot_response}"})
 
 @app.route("/")
 def home():
