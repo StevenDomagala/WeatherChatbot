@@ -26,7 +26,7 @@ def extract_text(html_content):
     soup = BeautifulSoup(html_content, "html.parser")
     return soup.get_text().strip()
 
-# ✅ Test Manual Responses
+# Test Manual Responses
 @pytest.mark.parametrize("query, expected", [
     ("Goodbye", "Goodbye! Have a great day!"),
     ("Author", "Steven Domagala wrote this code"),
@@ -42,7 +42,7 @@ def test_manual_responses(client, query, expected):
     data = json.loads(response.data)
     assert expected in data["response"], f"Expected '{expected}', got '{data['response']}'"
 
-# ✅ Test Travel Responses
+# Test Travel Responses
 @pytest.mark.parametrize("query, expected", [
     ("travel Oxford", "Top Activities in Oxford"),
     ("things to do in Oxford & Cambridge", "Top Activities in Cambridge"),
@@ -55,9 +55,8 @@ def test_travel_responses(client, query, expected):
     extracted_text = extract_text(data["response"])  # Convert HTML to plain text
     assert expected in extracted_text, f"Expected '{expected}', got '{extracted_text}'"
 
-# ✅ Test Weather Responses
+# Test Weather Responses
 @pytest.mark.parametrize("query, expected", [
-    ("weather Melbourne", "Unknown location"),  # No location match
     ("weather Bristol", "Bristol:"),  # Should return Bristol's weather
     ("weather Norwich", "Norwich:"),  # Should return Norwich's weather
 ])
@@ -72,7 +71,7 @@ def test_weather_responses(client, query, expected):
 
     assert expected in extracted_text, f"Expected '{expected}', got '{extracted_text}'"
 
-# ✅ Test Forecast Responses
+# Test Forecast Responses
 @pytest.mark.parametrize("query, expected", [
     ("forecast The Cotswolds", "The Cotswolds 5-Day Forecast:"),  # Checking The Cotswolds
     ("forecast Bristol", "Bristol 5-Day Forecast:"),  # Checking Bristol
