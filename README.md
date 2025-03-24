@@ -22,12 +22,10 @@ Test Weather<br>
 weather bristol<br>
 weather Norwich & Bristol & The cotswolds<br>
 weather Norwich & oxford & The Cotswolds<br>
-weather Melbourne <- Not in the list<br>
 <br>
 Test Forecasts<br>
 forecast Norwich & Bristol & The Cotswolds<br>
 forecast Norwich & oxford & The Cotswolds<br>
-forecast Sydney <- Not in the list<br>
 <br>
 Test Amadeus Travel<br>
 travel Cambridge & oxford<br>
